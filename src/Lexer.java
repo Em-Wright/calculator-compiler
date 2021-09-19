@@ -6,7 +6,7 @@ public class Lexer {
     // need the lexer to be able to recognise signed floating point numbers
     // and then the parser can just treat numbers as one blob, rather than dealing with each separate character
 
-    public static List<Token> lex(String[] input) throws Exception {
+    public static List<Token> lex(String input) throws Exception {
         List<Character> digits = Arrays.asList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
         char[] merged = String.join("", input).toCharArray();
 
@@ -45,21 +45,20 @@ public class Lexer {
             } else {
 
                 switch (ch) {
-                    case '+' -> {
+                    case '+':
                         result.add(new Token(Symbol.add, "+"));
-                    }
-                    case '-' -> {
+                        break;
+                    case '-' :
                         result.add(new Token(Symbol.subtract, "-"));
-                    }
-                    case '!' -> {
+                        break;
+                    case '!' :
                         result.add(new Token(Symbol.fact, "!"));
-                    }
-                    case '*' -> {
+                        break;
+                    case '*' :
                         result.add(new Token(Symbol.mult, "*"));
-                    }
-                    default -> {
+                        break;
+                    default:
                         throw new Exception("Unknown Symbol: "+ ch);
-                    }
                 }
             }
             x +=1;

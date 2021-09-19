@@ -10,7 +10,7 @@ public class Main {
 
         try {
             System.out.println("Tokenised input: ");
-            List<Token> lexed = Lexer.lex(new String[]{"cos 1235.673278! +"});
+            List<Token> lexed = Lexer.lex("cos 1235.673278!");
             for (Token v: lexed) {
                 System.out.println(v.type.toString());
             }
@@ -23,7 +23,7 @@ public class Main {
             System.out.println(root.toString());
 
         } catch (Exception e) {
-            System.out.println(e.toString()+" "+e.getMessage());
+            System.out.println(e.toString());
         }
 
 

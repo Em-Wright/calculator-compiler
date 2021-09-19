@@ -125,7 +125,7 @@ public class ParsingTable {
                 int prodLen = productions.get(stateList.get(x).get(0)).size(); // length of production
                 if (prodLen == stateList.get(x).get(1)) { // check if dot at end
                     if (stateList.get(x).get(0) == 0) { // if we're at the accepting state
-                        if (a == Symbol.end) {
+                        if (a == Symbol.end) { // if we're at the end of the input
                             return new Action(ActionType.Accept, 0);
                         } else {
                             return new Action(ActionType.Error, -1);
@@ -136,7 +136,6 @@ public class ParsingTable {
                 }
             }
         }
-
 
         return new Action(ActionType.Error, -1);
     }
