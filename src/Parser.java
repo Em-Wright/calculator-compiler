@@ -4,71 +4,59 @@ import java.util.Stack;
 
 public class Parser {
 
-    // integers on the stack refer to the states/sets of items in the canonical collection by index
-    private Stack<Integer> stack = new Stack<>();
+    private final ParsingTable parsingTable = new ParsingTable();
 
-    private ParsingTable parsingTable = new ParsingTable();
+    private final List<List<Symbol>> productions = Production.getProductions();
 
-    private List<List<Symbol>> productions = new Production().getProductions();
-
-    private List<Set<List<Integer>>> canonCollection = parsingTable.getCanonCollection();
+    private final List<Set<List<Integer>>> canonCollection = parsingTable.getCanonCollection();
 
 
-    // maybe implement inputStream using a queue, then we can easily take 1 symbol at a time???
-    // or leave as list and just increment???
-    // or use a stream, but figuring that out sounds like a faff
-    // BufferedInputStream??
-
-    public boolean parse(List<Token> inputStream) {
-        this.stack.push(0);
-        boolean accepted = false;
+    public Stack<ParseTree> parse(List<Token> inputStream) throws Exception {
+        Stack<ParseTree> parseTree = new Stack<>();
+        Stack<Integer> stack = new Stack<>();
+        stack.push(0);
         int i = 0;
-        Token v = inputStream.get(0);
         while(true) {
-            // need to continue past the end of the input stream cause we need to reduce
 
+            Token v;
             if (i < inputStream.size()) {
                 v = inputStream.get(i);
             } else if (i == inputStream.size()) {
-                v = new Token(Symbol.end, i, 1, "$");
+                v = new Token(Symbol.end, "$");
             } else {
-                accepted = false;
-                System.out.println("Syntax Error");
-                break;
+                throw new Exception("Syntax Error");
             }
-
-            System.out.println("Token: "+v.value);
 
             Action action = parsingTable.action(stack.peek(), v.type);
             if (action.getType() == ActionType.Shift) {
-                stack.push(action.getIndex()); // TODO - adding -1 here???
+                stack.push(action.getIndex());
+                parseTree.push(new ParseTree(v.type));
                 i += 1;
             } else if (action.getType() == ActionType.Reduce) {
 
                 List<Symbol> prod = productions.get(action.getIndex());
                 int len = prod.size() - 1;
+                ParseTree combineTree = new ParseTree(prod.get(0));
                 for (int x = 0; x < len; x += 1) {
                     stack.pop();
+                    combineTree.addChild(parseTree.pop());
                 }
+
+                parseTree.push(combineTree);
                 Set<List<Integer>> nextState = parsingTable.goTo(canonCollection.get(stack.peek()), prod.get(0));
                 Integer intNextState = canonCollection.indexOf(nextState);
-                stack.push(intNextState); // TODO - adding -1 here???
+                stack.push(intNextState);
             } else if (action.getType() == ActionType.Error) {
-                accepted = false;
-                System.out.println("Syntax Error");
-                break;
+                throw new Exception("Syntax Error");
             } else {
                 // Accept, but only if we're at the end of the input stream
                 if (v.type == Symbol.end) {
-                    accepted = true;
-                    System.out.println("accepted");
-                    break;
+                    return parseTree;
                 } else {
                     i+=1;
                 }
 
             }
         }
-        return accepted;
     }
 }

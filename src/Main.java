@@ -1,5 +1,5 @@
 import java.util.List;
-import java.util.Set;
+import java.util.Stack;
 
 public class Main {
 
@@ -8,23 +8,24 @@ public class Main {
 
         Parser parser = new Parser();
 
-        /*
-        ParsingTable parsingTable = new ParsingTable();
-        List<Set<List<Integer>>> canonCollection = parsingTable.getCanonCollection();
+        try {
+            System.out.println("Tokenised input: ");
+            List<Token> lexed = Lexer.lex(new String[]{"cos 1235.673278! +"});
+            for (Token v: lexed) {
+                System.out.println(v.type.toString());
+            }
 
+            Stack<ParseTree> parsed = parser.parse(lexed);
+            ParseTree root = parsed.pop();
 
-        for (Set<List<Integer>> set: canonCollection){
-            System.out.println(set);
-            System.out.println();
-        }*/
+            System.out.println("\nParse tree: ");
 
-        List<Token> lexed = Lexer.lex(new String[]{"cos 1235.673278! + 3 * 2 + 1.2"});
+            System.out.println(root.toString());
 
-        System.out.println();
-        System.out.println();
+        } catch (Exception e) {
+            System.out.println(e.toString()+" "+e.getMessage());
+        }
 
-        boolean parsed = parser.parse(lexed);
-        System.out.println(parsed);
 
     }
 

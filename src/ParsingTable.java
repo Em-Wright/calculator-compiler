@@ -14,7 +14,7 @@ public class ParsingTable {
     }
 
     private Set<List<Integer>> closure(Set<List<Integer>> items) {
-        List<List<Symbol>> productions = new Production().getProductions();
+        List<List<Symbol>> productions = Production.getProductions();
 
         Set<List<Integer>> collectItems = new HashSet<>(items);
 
@@ -25,8 +25,7 @@ public class ParsingTable {
             for (List<Integer> item: collectItems) {
                 // identify the symbol 'after' the dot
 
-                // need to skip if the dot is at the end of the item - else there'll be an error
-                // if you try to get the symbolat too high an index
+                // need to skip if the dot is at the end of the item
                 if (productions.get(item.get(0)).size() <= item.get(1)) {
                     continue;
                 }
@@ -57,7 +56,7 @@ public class ParsingTable {
         // is X, then move the dot along one and add that to the list of items to return
         // then generate the closure of that set
 
-        List<List<Symbol>> productions = new Production().getProductions();
+        List<List<Symbol>> productions = Production.getProductions();
 
         Set<List<Integer>> newItems = new HashSet<>();
         for (List<Integer> item: items) {
@@ -108,49 +107,31 @@ public class ParsingTable {
 
     }
 
-    // need functions action and goto
-    // which use the grammar
 
     public Action action(Integer state, Symbol a) {
         Set<List<Integer>> stateSet = this.canonCollection.get(state);
-        List<List<Symbol>> productions = new Production().getProductions();
-
-
-        // if there's a transition out using the symbol, do a shift to that state
-        // if not, see if there's an item which ends in a dot, and reduce using that
-        // if not, error
-        // unless it can't reduce cause it's accepting - need to differentiate that somehow
+        List<List<Symbol>> productions = Production.getProductions();
 
         if (a == Symbol.end && state == 0) {
-            System.out.println("Accepting cause at end");
             return new Action(ActionType.Accept, 0);
         }
 
-
-        // TODO: issue is that we're accepting for no reason -
-        //  should reject if there are still tokens and the next state doesn't exist
         Set<List<Integer>> nextState = this.goTo(stateSet, a);
         if (nextState.size() != 0 ) {
-            System.out.println("Shift");
-            System.out.println(nextState);
             return new Action(ActionType.Shift, this.canonCollection.indexOf(nextState));
         } else {
             List<List<Integer>> stateList = new ArrayList<>(stateSet);
             for (int x = 0; x < stateList.size(); x += 1) {
-                Integer prodLen = productions.get(stateList.get(x).get(0)).size(); // length of production
+                int prodLen = productions.get(stateList.get(x).get(0)).size(); // length of production
                 if (prodLen == stateList.get(x).get(1)) { // check if dot at end
                     if (stateList.get(x).get(0) == 0) { // if we're at the accepting state
                         if (a == Symbol.end) {
-                            System.out.println("Accept");
-                            System.out.println(productions.get(stateList.get(x).get(0)));
                             return new Action(ActionType.Accept, 0);
                         } else {
                             return new Action(ActionType.Error, -1);
                         }
 
                     }
-                    System.out.println("Reduce");
-                    System.out.println(productions.get(stateList.get(x).get(0)));
                     return new Action(ActionType.Reduce, stateList.get(x).get(0));
                 }
             }
